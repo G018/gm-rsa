@@ -72,14 +72,39 @@ var RSAUtil = (function (bigInt) {
   };
 
   function processStr (key, str) {
-    var chunkSize = 0;
-    while (MAX_CHAR_CODE.pow(chunkSize + 1).leq(key[0])) { chunkSize += 1 };
+    if (str.length < 1) { return str };
 
-    return processArr(key, splitBySize(str, chunkSize));
+    var SAFE_MARK = String.fromCharCode(0);
+    var safe = str.charAt(0) === SAFE_MARK;
+
+    var size = 0;
+    while (MAX_CHAR_CODE.pow(size + 1).leq(key[0])) { size += 1; };
+
+    if (safe) {
+      var arr = splitBySize(str.substr(1), size + 1);
+    } else {
+      var arr = splitBySize(str, size);
+    };
+
+    arr = processArr(key, arr);
+
+    if (!safe) {
+      arr = padStrArr(arr, size + 1);
+      arr.unshift(SAFE_MARK);
+    };
+
+    return arr.join("");
   };
 
   function splitBySize(str, size) {
     return str.match(RegExp('.{1,' + size + '}', 'g'));
+  };
+
+  function padStrArr (arr, size) {
+    return arr.map(function (str) {
+      while (str.length < size) { str = str + String.fromCharCode(0); };
+      return str;
+    });
   };
 
   function processArr (key, arr) {
