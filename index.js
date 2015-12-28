@@ -7,6 +7,8 @@ if (typeof module !== 'undefined' && this.module !== module) {
 var RSAUtil = (function (bigInt) {
   var rsa = {};
   var MAX_CHAR_CODE = bigInt(65536);
+  var SAFE_MARK = String.fromCharCode(0);
+  var STR_PAD = String.fromCharCode(0);
   
   rsa.generate = function (size) {
     size = bigInt(size || 100);
@@ -74,7 +76,6 @@ var RSAUtil = (function (bigInt) {
   function processStr (key, str) {
     if (str.length < 1) { return str };
 
-    var SAFE_MARK = String.fromCharCode(0);
     var safe = str.charAt(0) === SAFE_MARK;
 
     var size = 0;
@@ -102,7 +103,7 @@ var RSAUtil = (function (bigInt) {
 
   function padStrArr (arr, size) {
     return arr.map(function (str) {
-      while (str.length < size) { str = str + String.fromCharCode(0); };
+      while (str.length < size) { str = str + STR_PAD; };
       return str;
     });
   };
