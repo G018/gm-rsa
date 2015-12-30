@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>gm-rsa</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    
+    <script src="http://peterolson.github.io/BigInteger.js/BigInteger.min.js"></script>
+    <script src="gm-rsa.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+    <style>
+    .module {
+
+    }
+    .module input, .module button {
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="twelve columns">
+                <h3>GM's RSA Utility</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <h5 class="toggle"><a href="#">Page Information</a></h5>
+                <p class="info" style="display:none;">This page uses the gm-rsa package to provide a simple interface to use the RSA encryption. It has modified the default behaviour to change the "control" character to "null" in order for the browser to display it, this will produce errors with the cyphering in particular cases, but it is just a demo. It also uses a small key length since it is just for demonstration purposes, so please <b>don't</b> encrypt sensible information with this tool.</p>
+            </div>
+            <div class="six columns">
+                <h5 class="toggle"><a href="#">Message Encryption</a></h5>
+                <p class="info" style="display:none;">To send an encrypted message to someone ask for their encryption key. Then fill the encryption key in the corresponding field input a message on the encryption module and hit encrypt. Now send the cypher to that person, and he can use the decryption key and module to read the message. Only the one with the corresponding decryption key will be able to decypher it, note that this page uses a small key, so its <b>not safe</b> for sensible information</p>
+            </div>
+        </div>
+        <form class="rsa row">
+            <div class="module settings one-third column">
+                <br><h5>Key Settings</h5>
+
+                <h6 for="ekey">Encryption</h6>
+                <input type="text" class="ekey">
+                
+                <h6 for="dkey">Decryption</h6>
+                <input type="text" class="dkey">
+
+                <br>
+                <button type="button" class="generate">Generate</button>
+            </div>
+
+            <div class="module encryption one-third column">
+                <br><h5>Encryption</h5>
+
+                <h6 for="msg">Message</h6>
+                <input type="text" class="msg">
+
+                <h6 for="cyp">Cypher</h6>
+                <input type="text" class="cyp" readonly>
+
+                <br>
+                <button type="button" class="encrypt">Encrypt</button>
+            </div>
+        
+            <div class="module decryption one-third column">
+                <br><h5>Decryption</h5>
+
+                <h6 for="cyp">Cypher</h6>
+                <input type="text" class="cyp">
+
+                <h6 for="msg">Message</h6>
+                <input type="text" class="msg" readonly>
+
+                <br>
+                <button type="button" class="decrypt">Decrypt</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            var CTRL_CHAR = String.fromCharCode(0);
+            var NULL_CHAR = String.fromCharCode(9216);
+
+            var rsaProxy = {
+                root: function () { return $(".rsa"); },
+                module: function (mod) { return this.root().find("." + mod); },
+                elem: function (mod, elem) { return this.module(mod).find("." + elem); },
+            }
+
+            // Generate
+            rsaProxy.elem("settings", "generate").click(function () {
+               var keys = RSAUtil.generate(1000000);
+
+               rsaProxy.elem("settings", "ekey").val(JSON.stringify(keys.e));
+               rsaProxy.elem("settings", "dkey").val(JSON.stringify(keys.d));
+            });
+
+            // Encryption
+            rsaProxy.elem("encryption", "encrypt").click(function () {
+                var key = JSON.parse(rsaProxy.elem("settings", "ekey").val());
+                var msg = rsaProxy.elem("encryption", "msg").val();
+                var cyp = RSAUtil.encrypt(key,msg);
+                cyp = cyp.replace(CTRL_CHAR, NULL_CHAR); // Mask Control char for browser
+                
+                rsaProxy.elem("encryption", "cyp").val(cyp);
+            });
+
+            // Decryption
+            rsaProxy.elem("decryption", "decrypt").click(function () {
+                var key = JSON.parse(rsaProxy.elem("settings", "dkey").val());
+                var cyp = rsaProxy.elem("decryption", "cyp").val();
+                cyp  = cyp.replace(NULL_CHAR, CTRL_CHAR); // Mask Control char for browser
+                var msg = RSAUtil.decrypt(key,cyp)
+                
+                rsaProxy.elem("decryption", "msg").val(msg);
+            });
+
+            // Information toggles
+            $(".toggle").click(function () {
+                $(this).next(".info").toggle();
+            });
+        });
+    </script>
+</body>
+</html>
