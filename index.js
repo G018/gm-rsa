@@ -68,7 +68,7 @@ var RSAUtil = (function (bigInt) {
   };
 
   function processInt (key, num) {
-    num = bigInt(num)
+    num = bigInt(num);
     if (num.geq(key[0])) { return "Not processable" };
     return num.modPow(key[1],key[0]);
   };
