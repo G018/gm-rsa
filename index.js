@@ -98,7 +98,7 @@ var RSAUtil = (function (bigInt) {
   };
 
   function splitBySize(str, size) {
-    return str.match(RegExp('.{1,' + size + '}', 'g'));
+    return str.match(RegExp('[\\S\\s]{1,' + size + '}', 'g'));
   };
 
   function padStrArr (arr, size) {
